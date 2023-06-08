@@ -51,7 +51,7 @@ async function run() {
       res.send(result);
     })
 
-    // update the users role student to admin by using their id (admin only)
+    // update the users role student to admin (admin only)
     app.patch('/users/admin/:id', async (req, res) => {  
       const id = req.params.id; 
       const filter = {_id: new ObjectId(id)};
@@ -64,20 +64,46 @@ async function run() {
       res.send(result);
     })
 
-    // update the users role student to instructor by using their id (admin only)
-    app.patch('/users/instructor/:id', async (req, res) => {  
-      const id = req.params.id; 
-      const filter = {_id: new ObjectId(id)};
+    // update the users role student to instructor (admin only)
+    app.patch('/users/instructor/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: {
           role: 'instructor'
         }
       }
-      const result = await userCollection.updateOne(filter, updateDoc); 
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+    
+    // update the instructor classes status approve (admin only)
+    app.patch('/classes/approve/:id', async (req, res) => {  
+      const id = req.params.id; 
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          status: 'approved'
+        }
+      }
+      const result = await classCollection.updateOne(filter, updateDoc); 
       res.send(result);
     })
 
-    // create classes and store thier data to the database (instructor only)
+    // update the instructor classes status deny (admin only)
+    app.patch('/classes/deny/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'denied'
+        }
+      }
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    // create classes and store the data to the database (instructor only)
     app.post('/classes', async (req, res) => {
       const newClasses = req.body;
       const result = await classCollection.insertOne(newClasses);
