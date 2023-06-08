@@ -28,7 +28,7 @@ async function run() {
 
     const userCollection = client.db('dressxDB').collection('users');
 
-    // create users data 
+    // create users and store thier data to the database
     app.post('/users', async (req, res) => {
       const user = req.body; 
       const query = {email: user.email}
@@ -39,6 +39,11 @@ async function run() {
       res.send(result);
     })
 
+    // get all the users data
+    app.get('/users', async (req, res) => {
+      const result = await userCollection.find().toArray();  
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
