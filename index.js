@@ -29,13 +29,19 @@ async function run() {
     const userCollection = client.db('dressxDB').collection('users');
     const classCollection = client.db('dressxDB').collection('classes');
 
-    // get all the users data
+    // get all the users data (admin only)
     app.get('/users', async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     })
 
-    // create users and store thier data to the database
+    // get all the classes data (admin only)
+    app.get('/classes', async (req, res) => {
+      const result = await classCollection.find().toArray();
+      res.send(result);
+    })
+
+    // create users and store thier data to the database (admin only)
     app.post('/users', async (req, res) => {
       const newUser = req.body; 
       const query = {email: user.email}
@@ -45,7 +51,7 @@ async function run() {
       res.send(result);
     })
 
-    // update the users role student to admin by using their id
+    // update the users role student to admin by using their id (admin only)
     app.patch('/users/admin/:id', async (req, res) => {  
       const id = req.params.id; 
       const filter = {_id: new ObjectId(id)};
@@ -58,7 +64,7 @@ async function run() {
       res.send(result);
     })
 
-    // update the users role student to instructor by using their id
+    // update the users role student to instructor by using their id (admin only)
     app.patch('/users/instructor/:id', async (req, res) => {  
       const id = req.params.id; 
       const filter = {_id: new ObjectId(id)};
@@ -71,7 +77,7 @@ async function run() {
       res.send(result);
     })
 
-    // create classes and store thier data to the database
+    // create classes and store thier data to the database (instructor only)
     app.post('/classes', async (req, res) => {
       const newClasses = req.body;
       const result = await classCollection.insertOne(newClasses);
