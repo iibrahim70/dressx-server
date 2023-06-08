@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -28,6 +28,12 @@ async function run() {
 
     const userCollection = client.db('dressxDB').collection('users');
 
+    // get all the users data
+    app.get('/users', async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    })
+
     // create users and store thier data to the database
     app.post('/users', async (req, res) => {
       const user = req.body; 
@@ -39,11 +45,32 @@ async function run() {
       res.send(result);
     })
 
-    // get all the users data
-    app.get('/users', async (req, res) => {
-      const result = await userCollection.find().toArray();  
+    // update the users role student to admin by using their id
+    app.patch('/users/admin/:id', async (req, res) => {  
+      const id = req.params.id; 
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc); 
       res.send(result);
     })
+
+    // update the users role student to instructor by using their id
+    app.patch('/users/instructor/:id', async (req, res) => {  
+      const id = req.params.id; 
+      const filter = {_id: new ObjectId(id)};
+      const updateDoc = {
+        $set: {
+          role: 'instructor'
+        }
+      }
+      const result = await userCollection.updateOne(filter, updateDoc); 
+      res.send(result);
+    })
+
 
 
     // Send a ping to confirm a successful connection
