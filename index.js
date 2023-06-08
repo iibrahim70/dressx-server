@@ -26,8 +26,18 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const usersCollection = client.db('dressxDB').collection('users');
+    const userCollection = client.db('dressxDB').collection('users');
 
+    // create users data 
+    app.post('/users', async (req, res) => {
+      const user = req.body; 
+      const query = {email: user.email}
+      const existingUser = await userCollection.findOne(query);
+      console.log(existingUser);
+      if(existingUser) return res.send({message: 'User already exists'});
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    })
 
 
 
