@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db('dressxDB').collection('users');
+    const classCollection = client.db('dressxDB').collection('classes');
 
     // get all the users data
     app.get('/users', async (req, res) => {
@@ -36,12 +37,11 @@ async function run() {
 
     // create users and store thier data to the database
     app.post('/users', async (req, res) => {
-      const user = req.body; 
+      const newUser = req.body; 
       const query = {email: user.email}
       const existingUser = await userCollection.findOne(query);
-      console.log(existingUser);
       if(existingUser) return res.send({message: 'User already exists'});
-      const result = await userCollection.insertOne(user);
+      const result = await userCollection.insertOne(newUser);
       res.send(result);
     })
 
@@ -71,6 +71,12 @@ async function run() {
       res.send(result);
     })
 
+    // create classes and store thier data to the database
+    app.post('/classes', async (req, res) => {
+      const newClasses = req.body;
+      const result = await classCollection.insertOne(newClasses);
+      res.send(result);
+    })
 
 
     // Send a ping to confirm a successful connection
