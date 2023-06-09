@@ -110,6 +110,15 @@ async function run() {
       res.send(result);
     })
 
+    app.get('/myclasses', async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { instructorEmail: req.query.email };
+      }
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
