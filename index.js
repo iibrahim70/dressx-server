@@ -65,7 +65,7 @@ async function run() {
     })
 
     // update the users role student to instructor (admin only)
-    app.patch('/users/instructor/:id', async (req, res) => {
+    app.put('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -78,7 +78,7 @@ async function run() {
     })
     
     // update the instructor classes status approve (admin only)
-    app.patch('/classes/approve/:id', async (req, res) => {  
+    app.put('/classes/approve/:id', async (req, res) => {  
       const id = req.params.id; 
       const filter = {_id: new ObjectId(id)};
       const updateDoc = {
@@ -91,7 +91,7 @@ async function run() {
     })
 
     // update the instructor classes status deny (admin only)
-    app.patch('/classes/deny/:id', async (req, res) => {
+    app.put('/classes/deny/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -139,6 +139,13 @@ async function run() {
     app.get('/approve-classes', async (req, res) => {
       const query = { status: 'approved' };
       const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get classes by using id (instructor only)
+    app.get('/instructors', async (req, res) => {
+      const query = { role: 'instructor' };
+      const result = await userCollection.find(query).toArray();
       res.send(result);
     });
 
