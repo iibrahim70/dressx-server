@@ -65,7 +65,7 @@ async function run() {
     })
 
     // update the users role student to instructor (admin only)
-    app.put('/users/instructor/:id', async (req, res) => {
+    app.patch('/users/instructor/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -146,6 +146,24 @@ async function run() {
     app.get('/instructors', async (req, res) => {
       const query = { role: 'instructor' };
       const result = await userCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // update the classes data (instructor only)
+    app.put('/classes/update/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedClass = req.body;
+      const updateDoc = {
+        $set: {
+          feedback: updatedClass.feedback,
+          className: updatedClass.className,  
+          availableSeats: updatedClass.availableSeats,
+          price: updatedClass.price,
+          imageUrl: updatedClass.imageUrl,
+        }
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
