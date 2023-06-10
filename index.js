@@ -44,7 +44,7 @@ async function run() {
     // create users and store thier data to the database (admin only)
     app.post('/users', async (req, res) => {
       const newUser = req.body; 
-      const query = {email: user.email}
+      const query = {email: newUser.email}
       const existingUser = await userCollection.findOne(query);
       if(existingUser) return res.send({message: 'User already exists'});
       const result = await userCollection.insertOne(newUser);
@@ -103,6 +103,21 @@ async function run() {
       res.send(result);
     })
 
+    // send feedback to the instructor (admin only)
+    app.put('/classes/feedback/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedClass = req.body;
+      const updateDoc = {
+        $set: {
+          feedback: updatedClass.feedback,
+        }
+      };
+      const result = await classCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+
     // create classes and store the data to the database (instructor only)
     app.post('/classes', async (req, res) => {
       const newClasses = req.body;
@@ -110,6 +125,7 @@ async function run() {
       res.send(result);
     })
 
+    // get classes by using id (instructor only)
     app.get('/myclasses', async (req, res) => {
       let query = {};
       if (req.query?.email) {
@@ -119,6 +135,12 @@ async function run() {
       res.send(result);
     });
 
+    // get classes by using id (instructor only)
+    app.get('/approve-classes', async (req, res) => {
+      const query = { status: 'approved' };
+      const result = await classCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
