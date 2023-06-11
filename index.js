@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -9,6 +10,19 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// verify json web token
+const verifyJWT = (req, res, next) => {
+  const authorization = req.headers.authorization; 
+  if(!authorization) return res.status(401).send({error: true, message: 'Unauthorized Access'}); 
+
+  // bearer token authentication
+  const token = authorization.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.status(401).send({ error: true, message: 'Unauthorized Access' }); 
+    req.decoded = decoded;
+    next();
+  })
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.anttmlo.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -28,6 +42,13 @@ async function run() {
 
     const userCollection = client.db('dressxDB').collection('users');
     const classCollection = client.db('dressxDB').collection('classes');
+
+    // JSON WEB TOKEN 
+    app.post('/jwt', (req, res) => {
+      const user = req.body; 
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'}); 
+      res.send({token});
+    })
 
     // get all the users data (admin only)
     app.get('/users', async (req, res) => {
@@ -125,24 +146,28 @@ async function run() {
       res.send(result);
     })
 
-    // get classes by using id (instructor only)
-    app.get('/myclasses', async (req, res) => {
+    // get classes by using email (instructor only)
+    app.get('/myclasses', verifyJWT, async (req, res) => {
       let query = {};
       if (req.query?.email) {
         query = { instructorEmail: req.query.email };
       }
+
+      const decodedEmail = req.decoded.email; 
+      if (query.instructorEmail !== decodedEmail) return res.status(403).send({ error: true, message: 'Forbidden Access' });
+      
       const result = await classCollection.find(query).toArray();
       res.send(result);
     });
 
-    // get classes by using id (instructor only)
+    // get approve classes by using status called approve (instructor only)
     app.get('/approve-classes', async (req, res) => {
       const query = { status: 'approved' };
       const result = await classCollection.find(query).toArray();
       res.send(result);
     });
 
-    // get classes by using id (instructor only)
+    // get instructor by using role called instructor (instructor only)
     app.get('/instructors', async (req, res) => {
       const query = { role: 'instructor' };
       const result = await userCollection.find(query).toArray();
